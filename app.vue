@@ -62,35 +62,12 @@
             <div class="md:mr-3 mt-5 md:mt-0 mb-5 flex-col">
                 <div class="text-xs mb-5">
                     <span class="block text-gray-700">Theme</span>
-                    <button
-                        title="Moonstone Blue"
-                        class="inline-block rounded-full h-6 w-6 transition duration-200 mt-1 align-top mr-2 cursor-pointer bg-[#88a7bb]"
-                        :class="{ 'outline outline-2 outline-black': activeThemeName === 'moonstone_blue' }"
-                        @click="activeThemeName = 'moonstone_blue'"
-                    />
-                    <button
-                        title="Jade Green"
-                        class="inline-block rounded-full h-6 w-6 transition duration-200 mt-1 align-top mr-2 cursor-pointer bg-[#87b2a9]"
-                        :class="{ 'outline outline-2 outline-black': activeThemeName === 'jade_green' }"
-                        @click="activeThemeName = 'jade_green'"
-                    />
-                    <button
-                        title="Blood Moon"
-                        class="inline-block rounded-full h-6 w-6 transition duration-200 mt-1 align-top mr-2 cursor-pointer bg-[#ae5d59]"
-                        :class="{ 'outline outline-2 outline-black': activeThemeName === 'blood_moon' }"
-                        @click="activeThemeName = 'blood_moon'"
-                    />
-                    <button
-                        title="Mahogany"
-                        class="inline-block rounded-full h-6 w-6 transition duration-200 mt-1 align-top mr-2 cursor-pointer bg-[#ceaf6e]"
-                        :class="{ 'outline outline-2 outline-black': activeThemeName === 'mahogany' }"
-                        @click="activeThemeName = 'mahogany'"
-                    />
-                    <button
-                        title="Lavender"
-                        class="inline-block rounded-full h-6 w-6 transition duration-200 mt-1 align-top mr-2 cursor-pointer bg-[#ab9eaf]"
-                        :class="{ 'outline outline-2 outline-black': activeThemeName === 'lavender' }"
-                        @click="activeThemeName = 'lavender'"
+                    <button v-for="([key, value]) of themeEntries" :key="key"
+                        :title="value.name"
+                        class="inline-block rounded-full h-6 w-6 transition duration-200 mt-1 align-top mr-2 cursor-pointer"
+                        :class="{ 'outline outline-2 outline-black': activeThemeName === key }"
+                        :style="`background-image: linear-gradient(to bottom right, ${value.colors.join(', ')});`"
+                        @click="activeThemeName = key"
                     />
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
@@ -100,6 +77,14 @@
                             type="text"
                             class="text-sm mt-1 block w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0"
                             v-model="albumTitle"
+                        />
+                    </label>
+                    <label class="block">
+                        <span class="text-gray-700">Album Subtitle</span>
+                        <input
+                            type="text"
+                            class="text-sm mt-1 block w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0"
+                            v-model="albumSubtitle"
                         />
                     </label>
                     <label class="block">
@@ -113,130 +98,60 @@
                             @change="onImageChosen"
                         />
                     </label>
-                    <div>
-                        <label class="block">
-                            <span class="text-gray-700">Side A Label</span>
+                    <div v-for="(section, index) in sections" :key="index">
+                        <div>
+                            <label class="block">
+                                <span class="text-gray-700">Section Title</span>
+                                <input
+                                    type="text"
+                                    class="text-sm mt-1 block w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0"
+                                    v-model="sections[index].title"
+                                />
+                            </label>
+                            <div v-for="(track, tIndex) in section.tracks" :key="tIndex">
+                                <label class="block mt-2 ml-4">
+                                    <span class="text-gray-700">Track Title</span>
+                                    <input
+                                        type="text"
+                                        class="text-sm mt-1 block w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0"
+                                        v-model="sections[index].tracks[tIndex]"
+                                    />
+                                </label>
+                                <button
+                                    class="px-6 py-2 border-gray-800 text-gray-800 font-medium text-xs leading-normal uppercase rounded shadow-sm hover:bg-red-700 hover:shadow-md focus:bg-red-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-red-800 active:shadow-lg transition duration-150 ease-in-out flex align-center"
+                                    @click="removeTrack(index, tIndex)"
+                                >
+                                    Remove
+                                </button>
+                            </div>
+                            <button
+                                class="px-6 py-2 border-gray-800 text-gray-800 font-medium text-xs leading-normal uppercase rounded shadow-sm hover:bg-green-700 hover:shadow-md focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg transition duration-150 ease-in-out flex align-center"
+                                @click="addTrack(index)"
+                            >
+                                Add Track
+                            </button>
+                        </div>
+                        <label>
                             <input
-                                type="text"
-                                class="text-sm mt-1 block w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0"
-                                v-model="sideALabel"
+                                type="checkbox"
+                                class="mt-2"
+                                v-model="sections[index].isSmall"
                             />
+                            <span class="ml-2 text-gray-700">Small Section</span>
                         </label>
-                        <label class="block mt-2 ml-4">
-                            <span class="text-gray-700">Track One</span>
-                            <input
-                                type="text"
-                                class="text-sm mt-1 block w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0"
-                                v-model="trackOneTitle"
-                            />
-                        </label>
-                        <label class="block mt-2 ml-4">
-                            <span class="text-gray-700">Track Two</span>
-                            <input
-                                type="text"
-                                class="text-sm mt-1 block w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0"
-                                v-model="trackTwoTitle"
-                            />
-                        </label>
-                        <label class="block mt-2 ml-4">
-                            <span class="text-gray-700">Track Three</span>
-                            <input
-                                type="text"
-                                class="text-sm mt-1 block w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0"
-                                v-model="trackThreeTitle"
-                            />
-                        </label>
-                        <label class="block mt-2 ml-4">
-                            <span class="text-gray-700">Track Four</span>
-                            <input
-                                type="text"
-                                class="text-sm mt-1 block w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0"
-                                v-model="trackFourTitle"
-                            />
-                        </label>
-                        <label class="block mt-2 ml-4">
-                            <span class="text-gray-700">Track Five</span>
-                            <input
-                                type="text"
-                                class="text-sm mt-1 block w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0"
-                                v-model="trackFiveTitle"
-                            />
-                        </label>
-                        <label class="block mt-2 ml-4">
-                            <span class="text-gray-700">Track Six</span>
-                            <input
-                                type="text"
-                                class="text-sm mt-1 block w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0"
-                                v-model="trackSixTitle"
-                            />
-                        </label>
+                        <button
+                            class="px-6 py-2 border-gray-800 text-gray-800 font-medium text-xs leading-normal uppercase rounded shadow-sm hover:bg-red-700 hover:shadow-md focus:bg-red-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-red-800 active:shadow-lg transition duration-150 ease-in-out flex align-center"
+                            @click="removeSection(index)"
+                        >
+                            Remove Section
+                        </button>
                     </div>
-                    <div>
-                        <label class="block">
-                            <span class="text-gray-700">Side B Label</span>
-                            <input
-                                type="text"
-                                class="text-sm mt-1 block w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0"
-                                v-model="sideBLabel"
-                            />
-                        </label>
-                        <label class="block mt-2 ml-4">
-                            <span class="text-gray-700">Track Seven</span>
-                            <input
-                                type="text"
-                                class="text-sm mt-1 block w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0"
-                                v-model="trackSevenTitle"
-                            />
-                        </label>
-                        <label class="block mt-2 ml-4">
-                            <span class="text-gray-700">Track Eight</span>
-                            <input
-                                type="text"
-                                class="text-sm mt-1 block w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0"
-                                v-model="trackEightTitle"
-                            />
-                        </label>
-                        <label class="block mt-2 ml-4">
-                            <span class="text-gray-700">Track Nine</span>
-                            <input
-                                type="text"
-                                class="text-sm mt-1 block w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0"
-                                v-model="trackNineTitle"
-                            />
-                        </label>
-                        <label class="block mt-2 ml-4">
-                            <span class="text-gray-700">Track Ten</span>
-                            <input
-                                type="text"
-                                class="text-sm mt-1 block w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0"
-                                v-model="trackTenTitle"
-                            />
-                        </label>
-                        <label class="block mt-2 ml-4">
-                            <span class="text-gray-700">Track Eleven</span>
-                            <input
-                                type="text"
-                                class="text-sm mt-1 block w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0"
-                                v-model="trackElevenTitle"
-                            />
-                        </label>
-                        <label class="block mt-2 ml-4">
-                            <span class="text-gray-700">Track Twelve</span>
-                            <input
-                                type="text"
-                                class="text-sm mt-1 block w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0"
-                                v-model="trackTwelveTitle"
-                            />
-                        </label>
-                        <label class="block mt-2 ml-4">
-                            <span class="text-gray-700">Track Thirteen</span>
-                            <input
-                                type="text"
-                                class="text-sm mt-1 block w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0"
-                                v-model="trackThirteenTitle"
-                            />
-                        </label>
-                    </div>
+                    <button
+                        class="px-6 py-2 bg-green-600 text-white font-medium text-xs leading-normal uppercase rounded shadow-sm hover:bg-green-700 hover:shadow-md focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg transition duration-150 ease-in-out flex align-center"
+                        @click="addSection"
+                    >
+                        Add Section
+                    </button>
                 </div>
             </div>
         </div>
@@ -253,38 +168,99 @@ import debounce from 'lodash.debounce';
 
 const debouncedRender = debounce(render, 300);
 const themes = {
-    moonstone_blue: ['#536184', '#62869a', '#88a7bb'],
-    jade_green: ['#4e6861', '#799e98', '#87b2a9'],
-    blood_moon: ['#824e4c', '#9e5653', '#ae5d59'],
-    mahogany: ['#9c7b3d', '#b09254', '#bea162'],
-    lavender: ['#847490', '#988a9f', '#ab9eaf'],
+    moonstone_blue: {
+        name: "Moonstone Blue",
+        colors: ['#536184', '#62869a', '#88a7bb'],
+    },
+    jade_green: {
+        name: "Jade Green",
+        colors: ['#4e6861', '#799e98', '#87b2a9'],
+    },
+    blood_moon: {
+        name: "Blood Moon",
+        colors: ['#824e4c', '#9e5653', '#ae5d59'],
+    },
+    mahogany: {
+        name: "Mahogany",
+        colors: ['#9c7b3d', '#b09254', '#bea162'],
+    },
+    lavender: {
+        name: "Lavender",
+        colors: ['#847490', '#988a9f', '#ab9eaf'],
+    },
 };
+
+const darkThemes = {
+    tilDawn: {
+        name: 'Til Dawn Edition',
+        colors: ['#0f0f2c', '#8c5a4c', '#604959', '#443749', '#474a5a'],
+        stops: [0, 50, 75, 85, 100],
+        angle: 75,
+    },
+    lateNight: {
+        name: 'Late Night Edition',
+        colors: ['#090927', '#2d475b'],
+        stops: [0, 100],
+        angle: 75,
+    },
+};
+
+const themeEntries = Object.entries({...themes, ...darkThemes});
 
 const albumCoverCanvas = ref(null);
 const supportsClipboardApi = ref(false);
 const copyToClipboardText = ref('Copy to Clipboard');
 const croppedAlbumImage = ref(null);
-const activeThemeName = ref('moonstone_blue');
+const activeThemeName = ref('tilDawn');
 
 const albumTitle = ref('Midnights');
+const albumSubtitle = ref('(The Til Dawn Edition)');
 const albumImage = ref('/img/cover_image_moonstone_blue.jpg');
-const sideALabel = ref('Side A');
-const sideBLabel = ref('Side B');
-const trackOneTitle = ref('Track One');
-const trackTwoTitle = ref('Track Two');
-const trackThreeTitle = ref('Track Three');
-const trackFourTitle = ref('Track Four');
-const trackFiveTitle = ref('Track Five');
-const trackSixTitle = ref('Track Six');
-const trackSevenTitle = ref('Track Seven');
-const trackEightTitle = ref('Track Eight');
-const trackNineTitle = ref('Track Nine');
-const trackTenTitle = ref('Track Ten');
-const trackElevenTitle = ref('Track Eleven');
-const trackTwelveTitle = ref('Track Twelve');
-const trackThirteenTitle = ref('Track Thirteen');
+const sections = ref([
+    {
+        title: "",
+        tracks: [
+            "Lavender Haze",
+            "Maroon",
+            "Anti-Hero",
+            "Snow On The Beach",
+            "You're On Your Own, Kid",
+            "Midnight Rain",
+            "Question...?",
+            "Vigilante Shit",
+            "Bejeweled",
+            "Labyrinth",
+            "Karma",
+            "Sweet Nothing",
+            "Mastermind",
+        ],
+    },
+    {
+        title: "3am Tracks",
+        tracks: [
+            "The Great War",
+            "Bigger Than The Whole Sky",
+            "Paris",
+            "High Infidelity",
+            "Glitch",
+            "Would've Could've Should've",
+            "Dear Reader",
+        ],
+        isSmall: true,
+    },
+    {
+        title: "Til Dawn Tracks",
+        tracks: [
+            "Hits Different",
+            "Snow On The Beach",
+            "Karma",
+        ],
+        isSmall: true,
+    },
+]);
 
-const activeTheme = computed(() => themes[activeThemeName.value]);
+const activeTheme = computed(() => themes[activeThemeName.value] ?? darkThemes[activeThemeName.value]);
+const isDarkTheme = computed(() => activeThemeName.value in darkThemes);
 
 watch(albumImage, () => {
     croppedAlbumImage.value = null;
@@ -293,7 +269,7 @@ watch(activeThemeName, () => {
     if (!albumImage.value.startsWith('/img/')) {
         return;
     }
-    if (activeThemeName.value === 'lavender') {
+    if (['lavender', ...Object.keys(darkThemes)].includes(activeThemeName.value)) {
         albumImage.value = `/img/cover_image_moonstone_blue.jpg`;
     } else {
         albumImage.value = `/img/cover_image_${activeThemeName.value}.jpg`;
@@ -301,22 +277,9 @@ watch(activeThemeName, () => {
 });
 watch([
     albumTitle,
+    albumSubtitle,
     albumImage,
-    sideALabel,
-    sideBLabel,
-    trackOneTitle,
-    trackTwoTitle,
-    trackThreeTitle,
-    trackFourTitle,
-    trackFiveTitle,
-    trackSixTitle,
-    trackSevenTitle,
-    trackEightTitle,
-    trackNineTitle,
-    trackTenTitle,
-    trackElevenTitle,
-    trackTwelveTitle,
-    trackThirteenTitle,
+    sections,
     activeTheme,
 ], () => {
     debouncedRender();
@@ -325,7 +288,7 @@ watch([
 onMounted(async () => {
     window.WebFontConfig = {
         google: {
-            families: ['Roboto:300,400,500,700'],
+            families: ['Roboto:300,400,500,700', 'Helvetica:300,400,500,700'],
         },
         active: () => render(),
     };
@@ -365,6 +328,30 @@ function download() {
     link.click();
 }
 
+function addSection() {
+    sections.value.push({
+        title: 'New Section',
+        tracks: [],
+        isSmall: false,
+    });
+    sections.value = [...sections.value];
+}
+
+function removeSection(sectionIndex) {
+    sections.value.splice(sectionIndex, 1);
+    sections.value = [...sections.value];
+}
+
+function addTrack(sectionIndex) {
+    sections.value[sectionIndex].tracks.push('New Track');
+    sections.value = [...sections.value];
+}
+
+function removeTrack(sectionIndex, trackIndex) {
+    sections.value[sectionIndex].tracks.splice(trackIndex, 1);
+    sections.value = [...sections.value];
+}
+
 function onImageChosen(e) {
     if (e.target.files.length <= 0) {
         return;
@@ -381,66 +368,92 @@ async function render() {
     const letterSpacing = canvas.style.letterSpacing;
     const ctx = canvas.getContext('2d');
 
+    const font = "Helvetica";
+
     // clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // background color
-    ctx.fillStyle = '#e9e8e4';
+    if (isDarkTheme.value) {
+        const angle = activeTheme.value.angle * Math.PI / 180;
+        var x2 = canvas.width * Math.cos(angle);  // angle in radians
+        var y2 = canvas.height * Math.sin(angle);  // angle in radians
+        const gradient = ctx.createLinearGradient(0, 0, x2, y2);
+        for (let i = 0; i < activeTheme.value.colors.length; i++) {
+            gradient.addColorStop(activeTheme.value.stops[i] / 100, activeTheme.value.colors[i]);
+        }
+        ctx.fillStyle = gradient;
+    } else {
+        ctx.fillStyle = '#e9e8e4';
+    }
     ctx.fillRect(0,0, canvas.width, canvas.height);
 
     // watermark
-    ctx.fillStyle = `${activeTheme.value[1]}6F`;
-    ctx.font = '300 16px Roboto';
+    if (isDarkTheme.value) {
+        ctx.fillStyle = `#e9e8e46F`;
+    } else {
+        ctx.fillStyle = `${activeTheme.value.colors[1]}6F`;
+    }
+    ctx.font = `300 16px ${font}`;
     ctx.fillText('made with midnightsmaker.com', 10, 24);
 
     // album title
     canvas.style.letterSpacing = '-2px';
-    ctx.font = '700 78px Roboto';
+    ctx.font = `700 78px ${font}`;
     // gradient for album title
-    const gradient = ctx.createLinearGradient(233, 0, 233 + ctx.measureText(albumTitle.value).width, 0);
-    gradient.addColorStop(0,activeTheme.value[0]);
-    gradient.addColorStop(0.45, activeTheme.value[1]);
-    gradient.addColorStop(1, activeTheme.value[2]);
-    ctx.fillStyle = gradient;
+    if (!isDarkTheme.value) {
+        const gradient = ctx.createLinearGradient(233, 0, 233 + ctx.measureText(albumTitle.value).width, 0);
+        gradient.addColorStop(0,activeTheme.value.colors[0]);
+        gradient.addColorStop(0.45, activeTheme.value.colors[1]);
+        gradient.addColorStop(1, activeTheme.value.colors[2]);
+        ctx.fillStyle = gradient;
+    } else {
+        ctx.fillStyle = '#e9e8e4';
+    }
     ctx.fillText(albumTitle.value, 233, 190 / 0.8, 737);
+    const albumTitleWidth = ctx.measureText(albumTitle.value).width;
 
     // restore letterSpacing
     canvas.style.letterSpacing = letterSpacing;
 
+    // album subtitle
+    ctx.font = `400 24px ${font}`;
+    ctx.fillText(albumSubtitle.value, 233 + albumTitleWidth + 12, 190 / 0.8, 737);
+
     const sideGradient = [
-        { offset: 0, color: activeTheme.value[2] },
-        { offset: 0.12, color: activeTheme.value[1] },
-        { offset: 1, color: activeTheme.value[0] },
+        { offset: 0, color: activeTheme.value.colors[2] },
+        { offset: 0.12, color: activeTheme.value.colors[1] },
+        { offset: 1, color: activeTheme.value.colors[0] },
     ];
 
-    // Side A
-    ctx.font = '400 18px Roboto';
-    addGradientText(ctx, sideALabel.value, 30, 634, sideGradient);
-    textUnderline(ctx, sideALabel.value, 30, 634, 18, sideGradient);
+    const sectionTitleHeight = (isSmall) => isSmall ? 25 : 31;
+    const trackTitleHeight = (isSmall) => isSmall ? 17 : 20;
 
-    // A Tracks
-    ctx.font = '500 18px Roboto';
-    addGradientText(ctx, trackOneTitle.value, 30, 665, sideGradient);
-    addGradientText(ctx, trackTwoTitle.value, 30, 665 + 20, sideGradient);
-    addGradientText(ctx, trackThreeTitle.value, 30, 665 + 20 * 2, sideGradient);
-    addGradientText(ctx, trackFourTitle.value, 30, 665 + 20 * 3, sideGradient);
-    addGradientText(ctx, trackFiveTitle.value, 30, 665 + 20 * 4, sideGradient);
-    addGradientText(ctx, trackSixTitle.value, 30, 665 + 20 * 5, sideGradient);
+    const sideGradientWidth = Math.max(...sections.value.flatMap(section => [section.title, ...section.tracks]).map(text => ctx.measureText(text).width));
 
-    // Side B
-    ctx.font = '400 18px Roboto';
-    addGradientText(ctx, sideBLabel.value, 30, 813, sideGradient);
-    textUnderline(ctx, sideBLabel.value, 30, 813, 18, sideGradient);
+    let currentSectionStart = canvas.height - sections.value.reduce((acc, section) => {
+        let currentHeight = 0;
+        currentHeight += sectionTitleHeight(section.isSmall);
+        currentHeight += trackTitleHeight(section.isSmall) * section.tracks.length;
+        currentHeight += 12;
+        return acc + currentHeight;
+    }, 0);
+    
+    for (const section of sections.value) {
+        // section title
+        ctx.font = section.isSmall ? `400 15px ${font}` : `400 18px ${font}`;
+        addGradientText(ctx, section.title, 30, currentSectionStart, sideGradient, sideGradientWidth);
+        if (section.title !== '')
+            textUnderline(ctx, section.title, 30, currentSectionStart, 18, sideGradient);
 
-    // B Tracks
-    ctx.font = '500 18px Roboto';
-    addGradientText(ctx, trackSevenTitle.value, 30, 844, sideGradient);
-    addGradientText(ctx, trackEightTitle.value, 30, 844 + 20, sideGradient);
-    addGradientText(ctx, trackNineTitle.value, 30, 844 + 20 * 2, sideGradient);
-    addGradientText(ctx, trackTenTitle.value, 30, 844 + 20 * 3, sideGradient);
-    addGradientText(ctx, trackElevenTitle.value, 30, 844 + 20 * 4, sideGradient);
-    addGradientText(ctx, trackTwelveTitle.value, 30, 844 + 20 * 5, sideGradient);
-    addGradientText(ctx, trackThirteenTitle.value, 30, 844 + 20 * 6, sideGradient);
+        // section tracks
+        ctx.font = section.isSmall ? `500 15px ${font}` : `500 18px ${font}`;
+        for (let i = 0; i < section.tracks.length; i++) {
+            addGradientText(ctx, section.tracks[i], 30, currentSectionStart + sectionTitleHeight(section.isSmall) + trackTitleHeight(section.isSmall) * i, sideGradient, sideGradientWidth);
+        }
+
+        currentSectionStart += sectionTitleHeight(section.isSmall) + trackTitleHeight(section.isSmall) * section.tracks.length + 12;
+    }
 
     // album image
     if (!croppedAlbumImage.value) {
@@ -455,11 +468,15 @@ async function render() {
     coverImage.src = croppedAlbumImage.value;
 }
 
-function addGradientText(ctx, text, x, y, gradientStops, maxWidth) {
-    const gradient = ctx.createLinearGradient(x, 0, x + ctx.measureText(text).width, 0);
-    gradientStops.forEach(stop => gradient.addColorStop(stop.offset, stop.color));
-    // Fill with gradient
-    ctx.fillStyle = gradient;
+function addGradientText(ctx, text, x, y, gradientStops, gradientWidth, maxWidth) {
+    if (isDarkTheme.value) {
+        ctx.fillStyle = '#e9e8e4';
+    } else {
+        const gradient = ctx.createLinearGradient(x, 0, x + gradientWidth, 0);
+        gradientStops.forEach(stop => gradient.addColorStop(stop.offset, stop.color));
+        // Fill with gradient
+        ctx.fillStyle = gradient;
+    }
     ctx.fillText(text, x, y, maxWidth);
 }
 
@@ -475,9 +492,13 @@ function textUnderline(context, text, x, y, textSize, gradientStops) {
     startX = x;
     endX = x + textWidth + 1;
 
-    const gradient = context.createLinearGradient(x, 0, x + textWidth, 0);
-    gradientStops.forEach(stop => gradient.addColorStop(stop.offset, stop.color));
-    context.strokeStyle = gradient;
+    if (isDarkTheme.value) {
+        context.strokeStyle = '#e9e8e4';
+    } else {
+        const gradient = context.createLinearGradient(x, 0, x + textWidth, 0);
+        gradientStops.forEach(stop => gradient.addColorStop(stop.offset, stop.color));
+        context.strokeStyle = gradient;
+    }
     // noinspection JSSuspiciousNameCombination
     context.lineWidth = underlineHeight;
     context.moveTo(startX, startY);

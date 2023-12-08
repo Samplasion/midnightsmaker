@@ -10,7 +10,7 @@
   "devDependencies": {
     "@nuxtjs/tailwindcss": "^5.3.2",
     "@tailwindcss/forms": "^0.5.3",
-    "nuxt": "3.0.0-rc.9"
+    "nuxt": "^3.8.2"
   },
   "dependencies": {
     "darkreader": "^4.9.57",
