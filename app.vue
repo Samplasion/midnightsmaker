@@ -10,11 +10,11 @@
             <Meta property="og:image" content="https://midnightsmaker.com/meta_image.jpg"/>
             <Meta property="twitter:image" content="https://midnightsmaker.com/meta_image.jpg"/>
             <!-- Favicon -->
-            <Link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"/>
-            <Link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"/>
-            <Link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"/>
-            <Link rel="manifest" href="/site.webmanifest"/>
-            <Link rel="mask-icon" href="/safari-pinned-tab.svg" color="#62869a"/>
+            <Link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"/>
+            <Link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png"/>
+            <Link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png"/>
+            <Link rel="manifest" href="site.webmanifest"/>
+            <Link rel="mask-icon" href="safari-pinned-tab.svg" color="#62869a"/>
             <Meta name="msapplication-TileColor" content="#e9e8e4"/>
             <Meta name="theme-color" content="#e9e8e4"/>
         </Head>
@@ -215,7 +215,7 @@ const activeThemeName = ref('tilDawn');
 
 const albumTitle = ref('Midnights');
 const albumSubtitle = ref('(The Til Dawn Edition)');
-const albumImage = ref('/img/cover_image_moonstone_blue.jpg');
+const albumImage = ref('img/cover_image_moonstone_blue.jpg');
 const sections = ref([
     {
         title: "",
@@ -243,7 +243,7 @@ const sections = ref([
             "Paris",
             "High Infidelity",
             "Glitch",
-            "Would've Could've Should've",
+            "Would've, Could've, Should've",
             "Dear Reader",
         ],
         isSmall: true,
@@ -266,13 +266,13 @@ watch(albumImage, () => {
     croppedAlbumImage.value = null;
 });
 watch(activeThemeName, () => {
-    if (!albumImage.value.startsWith('/img/')) {
+    if (!albumImage.value.startsWith('img/')) {
         return;
     }
     if (['lavender', ...Object.keys(darkThemes)].includes(activeThemeName.value)) {
-        albumImage.value = `/img/cover_image_moonstone_blue.jpg`;
+        albumImage.value = `img/cover_image_moonstone_blue.jpg`;
     } else {
-        albumImage.value = `/img/cover_image_${activeThemeName.value}.jpg`;
+        albumImage.value = `img/cover_image_${activeThemeName.value}.jpg`;
     }
 });
 watch([
