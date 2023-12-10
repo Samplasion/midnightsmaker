@@ -108,13 +108,19 @@
                                     v-model="sections[index].title"
                                 />
                             </label>
-                            <div v-for="(track, tIndex) in section.tracks" :key="tIndex">
-                                <label class="block mt-2 ml-4">
+                            <div v-for="(track, tIndex) in section.tracks" :key="tIndex" class="mt-2 ml-4">
+                                <label class="block">
                                     <span class="text-gray-700">Track Title</span>
                                     <input
                                         type="text"
                                         class="text-sm mt-1 block w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0"
-                                        v-model="sections[index].tracks[tIndex]"
+                                        v-model="sections[index].tracks[tIndex].name"
+                                    />
+                                    <span class="text-gray-700">Track Feat. Line</span>
+                                    <input
+                                        type="text"
+                                        class="text-sm mt-1 block w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0"
+                                        v-model="sections[index].tracks[tIndex].featLine"
                                     />
                                 </label>
                                 <button
@@ -162,9 +168,14 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 // TODO: darkreader
+// @ts-ignore
 import debounce from 'lodash.debounce';
+
+const coverX = 242;
+const sidebarTextX = 24;
+const sidebarTextWidth = coverX - sidebarTextX;
 
 const debouncedRender = debounce(render, 300);
 const themes = {
@@ -205,60 +216,134 @@ const darkThemes = {
     },
 };
 
-const themeEntries = Object.entries({...themes, ...darkThemes});
+type Theme = keyof typeof themes | keyof typeof darkThemes;
 
-const albumCoverCanvas = ref(null);
+const themeEntries: [Theme, any][] = Object.entries({...themes, ...darkThemes}) as any;
+
+const albumCoverCanvas: Ref<HTMLCanvasElement | null> = ref(null);
 const supportsClipboardApi = ref(false);
 const copyToClipboardText = ref('Copy to Clipboard');
-const croppedAlbumImage = ref(null);
-const activeThemeName = ref('tilDawn');
+const croppedAlbumImage: Ref<string | null> = ref(null);
+const activeThemeName: Ref<Theme> = ref('tilDawn');
 
 const albumTitle = ref('Midnights');
 const albumSubtitle = ref('(The Til Dawn Edition)');
 const albumImage = ref('img/cover_image_moonstone_blue.jpg');
-const sections = ref([
+const sections = reactive([
     {
         title: "",
         tracks: [
-            "Lavender Haze",
-            "Maroon",
-            "Anti-Hero",
-            "Snow On The Beach",
-            "You're On Your Own, Kid",
-            "Midnight Rain",
-            "Question...?",
-            "Vigilante Shit",
-            "Bejeweled",
-            "Labyrinth",
-            "Karma",
-            "Sweet Nothing",
-            "Mastermind",
+            {
+                name: "Lavender Haze",
+                featLine: null,
+            },
+            {
+                name: "Maroon",
+                featLine: null,
+            },
+            {
+                name: "Anti-Hero",
+                featLine: null,
+            },
+            {
+                name: "Snow On The Beach",
+                featLine: null,
+            },
+            {
+                // \u2009 is a thin space
+                name: "You're\u2009On\u2009Your\u2009Own,\u2009Kid",
+                featLine: null,
+            },
+            {
+                name: "Midnight Rain",
+                featLine: null,
+            },
+            {
+                name: "Question...?",
+                featLine: null,
+            },
+            {
+                name: "Vigilante Shit",
+                featLine: null,
+            },
+            {
+                name: "Bejeweled",
+                featLine: null,
+            },
+            {
+                name: "Labyrinth",
+                featLine: null,
+            },
+            {
+                name: "Karma",
+                featLine: null,
+            },
+            {
+                name: "Sweet Nothing",
+                featLine: null,
+            },
+            {
+                name: "Mastermind",
+                featLine: null,
+            },
         ],
+        isSmall: false,
     },
     {
         title: "3am Tracks",
         tracks: [
-            "The Great War",
-            "Bigger Than The Whole Sky",
-            "Paris",
-            "High Infidelity",
-            "Glitch",
-            "Would've, Could've, Should've",
-            "Dear Reader",
+            {
+                name: "The Great War",
+                featLine: null,
+            },
+            {
+                name: "Bigger Than The Whole Sky",
+                featLine: null,
+            },
+            {
+                name: "Paris",
+                featLine: null,
+            },
+            {
+                name: "High Infidelity",
+                featLine: null,
+            },
+            {
+                name: "Glitch",
+                featLine: null,
+            },
+            {
+                name: "Would've, Could've, Should've",
+                featLine: null,
+            },
+            {
+                name: "Dear Reader",
+                featLine: null,
+            },
         ],
         isSmall: true,
     },
     {
         title: "Til Dawn Tracks",
         tracks: [
-            "Hits Different",
-            "Snow On The Beach",
-            "Karma",
+            {
+                name: "Hits Different",
+                featLine: null,
+            },
+            {
+                name: "Snow On The Beach",
+                featLine: "(Feat. More Lana Del Rey)",
+            },
+            {
+                name: "Karma",
+                featLine: "(Feat. Ice Spice)",
+            },
         ],
         isSmall: true,
     },
 ]);
 
+// @ts-ignore
 const activeTheme = computed(() => themes[activeThemeName.value] ?? darkThemes[activeThemeName.value]);
 const isDarkTheme = computed(() => activeThemeName.value in darkThemes);
 
@@ -286,9 +371,10 @@ watch([
 });
 
 onMounted(async () => {
+    // @ts-ignore
     window.WebFontConfig = {
         google: {
-            families: ['Roboto:300,400,500,700', 'Helvetica:300,400,500,700'],
+            // families: ['Roboto:300,400,500,700', 'Helvetica Neue:300,400,500,700'],
         },
         active: () => render(),
     };
@@ -300,7 +386,7 @@ onMounted(async () => {
             const wf = d.createElement('script'), s = d.scripts[0];
             wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js';
             wf.async = true;
-            s.parentNode.insertBefore(wf, s);
+            s.parentNode!.insertBefore(wf, s);
         })(document);
     }
 
@@ -309,8 +395,8 @@ onMounted(async () => {
 
 function copyToClipboard() {
     copyToClipboardText.value = 'Copy to Clipboard';
-    albumCoverCanvas.value.toBlob(function(blob) {
-        const item = new ClipboardItem({ 'image/png': blob });
+    albumCoverCanvas.value!.toBlob(function(blob) {
+        const item = new ClipboardItem({ 'image/png': blob! });
         navigator.clipboard.write([item]);
         copyToClipboardText.value = 'Copied to Clipboard';
         setTimeout(function() {
@@ -320,7 +406,7 @@ function copyToClipboard() {
 }
 
 function download() {
-    const canvasImage = albumCoverCanvas.value.toDataURL('image/png').replace("image/png", "image/octet-stream");
+    const canvasImage = albumCoverCanvas.value!.toDataURL('image/png').replace("image/png", "image/octet-stream");
     const link = document.createElement('a');
     const fileName = `midnightsmaker-com_${slugify(albumTitle.value || 'midnights')}`.slice(0, 199);
     link.download = `${fileName}.png`;
@@ -329,46 +415,46 @@ function download() {
 }
 
 function addSection() {
-    sections.value.push({
+    sections.push({
         title: 'New Section',
         tracks: [],
         isSmall: false,
     });
-    sections.value = [...sections.value];
+    // sections.value = [...sections.value];
 }
 
-function removeSection(sectionIndex) {
-    sections.value.splice(sectionIndex, 1);
-    sections.value = [...sections.value];
+function removeSection(sectionIndex: number) {
+    sections.splice(sectionIndex, 1);
 }
 
-function addTrack(sectionIndex) {
-    sections.value[sectionIndex].tracks.push('New Track');
-    sections.value = [...sections.value];
+function addTrack(sectionIndex: number) {
+    sections[sectionIndex].tracks.push({
+        name: 'New Track',
+        featLine: null,
+    });
 }
 
-function removeTrack(sectionIndex, trackIndex) {
-    sections.value[sectionIndex].tracks.splice(trackIndex, 1);
-    sections.value = [...sections.value];
+function removeTrack(sectionIndex: number, trackIndex: number) {
+    sections[sectionIndex].tracks.splice(trackIndex, 1);
 }
 
-function onImageChosen(e) {
-    if (e.target.files.length <= 0) {
+function onImageChosen(e: any) {
+    if (e.target!.files.length <= 0) {
         return;
     }
     const reader = new FileReader();
     reader.onload = function(e) {
-        albumImage.value = e.target.result;
+        albumImage.value = e.target!.result!.toString();
     };
     reader.readAsDataURL(e.target.files[0]);
 }
 
 async function render() {
-    const canvas = albumCoverCanvas.value;
+    const canvas = albumCoverCanvas.value!;
     const letterSpacing = canvas.style.letterSpacing;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d')!;
 
-    const font = "Helvetica";
+    const font = "Helvetica Neue";
 
     // clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -398,7 +484,7 @@ async function render() {
     ctx.fillText('made with midnightsmaker.com', 10, 24);
 
     // album title
-    canvas.style.letterSpacing = '-2px';
+    canvas.style.letterSpacing = '-2.3px';
     ctx.font = `700 78px ${font}`;
     // gradient for album title
     if (!isDarkTheme.value) {
@@ -410,49 +496,113 @@ async function render() {
     } else {
         ctx.fillStyle = '#e9e8e4';
     }
-    ctx.fillText(albumTitle.value, 233, 190 / 0.8, 737);
+    ctx.fillText(albumTitle.value, 237, 190 / 0.8 + 4, 737);
     const albumTitleWidth = ctx.measureText(albumTitle.value).width;
+
+    // restore letterSpacing
+    canvas.style.letterSpacing = "0.4px";
+
+    // album subtitle
+    ctx.font = `400 24px ${font}`;
+    ctx.fillText(albumSubtitle.value, 234 + albumTitleWidth + 18, 190 / 0.8 + 4, 737);
 
     // restore letterSpacing
     canvas.style.letterSpacing = letterSpacing;
 
-    // album subtitle
-    ctx.font = `400 24px ${font}`;
-    ctx.fillText(albumSubtitle.value, 233 + albumTitleWidth + 12, 190 / 0.8, 737);
-
     const sideGradient = [
         { offset: 0, color: activeTheme.value.colors[2] },
-        { offset: 0.12, color: activeTheme.value.colors[1] },
+        { offset: 0.25, color: activeTheme.value.colors[1] },
         { offset: 1, color: activeTheme.value.colors[0] },
     ];
 
-    const sectionTitleHeight = (isSmall) => isSmall ? 25 : 31;
-    const trackTitleHeight = (isSmall) => isSmall ? 17 : 20;
+    const sectionTitleHeight = (isSmall: boolean) => isSmall ? 25 : 31;
+    const trackTitleHeight = (isSmall: boolean) => isSmall ? 17.4 : 21.4;
+    const bigFontSize = 19;
+    const smallFontSize = 15;
+    const afterSectionSpacing = (isSmall: boolean) => isSmall ? 12 : 6;
 
-    const sideGradientWidth = Math.max(...sections.value.flatMap(section => [section.title, ...section.tracks]).map(text => ctx.measureText(text).width));
+    const boldFont = (isSmall: boolean) => isSmall ? `500 ${smallFontSize}px ${font}` : `500 ${bigFontSize}px ${font}`;
+    const regularFont = (isSmall: boolean) => isSmall ? `400 ${smallFontSize}px ${font}` : `400 ${bigFontSize}px ${font}`;
 
-    let currentSectionStart = canvas.height - sections.value.reduce((acc, section) => {
+    console.log(sections.flatMap(section => [section.title, ...section.tracks.map(track => track.name)]).map(text => ctx.measureText(text).width));
+    const sideGradientWidth = Math.max(...sections.flatMap(section => [section.title, ...section.tracks.map(track => track.name)]).map(text => ctx.measureText(text).width));
+
+    const previousFontData = ctx.font;
+    let currentSectionStart = canvas.height - sections.reduce((acc, section) => {
         let currentHeight = 0;
-        currentHeight += sectionTitleHeight(section.isSmall);
-        currentHeight += trackTitleHeight(section.isSmall) * section.tracks.length;
-        currentHeight += 12;
+        currentHeight += sectionTitleHeight(!!section.isSmall);
+        // currentHeight += trackTitleHeight(!!section.isSmall) * section.tracks.length;
+        ctx.font = section.isSmall ? `500 ${smallFontSize}px ${font}` : `500 ${bigFontSize}px ${font}`;
+        section.tracks.forEach((track) => {
+            ctx.font = boldFont(section.isSmall);
+            const titleLength = track.name ? ctx.measureText(track.name).width : 0;
+            ctx.font = regularFont(section.isSmall);
+            const spaceLength = ctx.measureText((titleLength ? " " : "")).width;
+            const featLineLength = ctx.measureText(track.featLine!).width;
+            if (titleLength + spaceLength + featLineLength > sidebarTextWidth) {
+                currentHeight += trackTitleHeight(!!section.isSmall) * (
+                    getTextLines(ctx, track.featLine ?? "").length);
+            }
+            currentHeight += trackTitleHeight(!!section.isSmall) *
+                Math.max(1, getTextLines(ctx, track.name).length);
+        });
+        currentHeight += afterSectionSpacing(!!section.isSmall);
         return acc + currentHeight;
     }, 0);
+    ctx.font = previousFontData;
     
-    for (const section of sections.value) {
+    for (const section of sections) {
         // section title
-        ctx.font = section.isSmall ? `400 15px ${font}` : `400 18px ${font}`;
-        addGradientText(ctx, section.title, 30, currentSectionStart, sideGradient, sideGradientWidth);
+        ctx.font = regularFont(section.isSmall);
+        addGradientText(ctx, section.title, sidebarTextX, currentSectionStart, sideGradient, sideGradientWidth);
         if (section.title !== '')
-            textUnderline(ctx, section.title, 30, currentSectionStart, 18, sideGradient);
+            textUnderline(ctx, section.title, sidebarTextX, currentSectionStart, 18, sideGradient);
 
         // section tracks
-        ctx.font = section.isSmall ? `500 15px ${font}` : `500 18px ${font}`;
+        let lines = 0;
         for (let i = 0; i < section.tracks.length; i++) {
-            addGradientText(ctx, section.tracks[i], 30, currentSectionStart + sectionTitleHeight(section.isSmall) + trackTitleHeight(section.isSmall) * i, sideGradient, sideGradientWidth);
+            ctx.font = boldFont(section.isSmall);
+
+            let newLines = addGradientLongText(
+                ctx, 
+                section.tracks[i].name, 
+                sidebarTextX,
+                currentSectionStart + sectionTitleHeight(section.isSmall) + trackTitleHeight(section.isSmall) * lines,
+                sideGradient, sideGradientWidth,
+                trackTitleHeight(section.isSmall),
+            );
+
+            if (section.tracks[i].featLine) {
+                ctx.font = boldFont(section.isSmall);
+                const titleLength = section.tracks[i].name ? ctx.measureText(section.tracks[i].name).width : 0;
+                ctx.font = regularFont(section.isSmall);
+                const spaceLength = ctx.measureText((titleLength ? " " : "")).width;
+                const featLineLength = ctx.measureText(section.tracks[i].featLine!).width;
+
+                if (titleLength + spaceLength + featLineLength > sidebarTextWidth) {
+                    newLines += addGradientLongText(
+                        ctx, 
+                        section.tracks[i].featLine!,
+                        sidebarTextX,
+                        currentSectionStart + sectionTitleHeight(section.isSmall) + trackTitleHeight(section.isSmall) * (lines + 1),
+                        sideGradient, sideGradientWidth,
+                        trackTitleHeight(section.isSmall),
+                    );
+                } else {
+                    addGradientText(
+                        ctx, 
+                        section.tracks[i].featLine!,
+                        sidebarTextX + spaceLength + titleLength,
+                        currentSectionStart + sectionTitleHeight(section.isSmall) + trackTitleHeight(section.isSmall) * lines,
+                        sideGradient, sideGradientWidth,
+                    );
+                }
+            }
+
+            lines += newLines;
         }
 
-        currentSectionStart += sectionTitleHeight(section.isSmall) + trackTitleHeight(section.isSmall) * section.tracks.length + 12;
+        currentSectionStart += sectionTitleHeight(section.isSmall) + trackTitleHeight(section.isSmall) * lines + afterSectionSpacing(section.isSmall);
     }
 
     // album image
@@ -461,26 +611,72 @@ async function render() {
     }
     const coverImage = new Image();
     coverImage.onload = () => {
-        const imageWidth = 767;
-        const imageHeight = 727;
-        ctx.drawImage(coverImage, 0, 0, coverImage.width, coverImage.height, 233 + 4, 274, imageWidth, imageHeight);
+        const imageWidth = 759;
+        const imageHeight = 729;
+        ctx.drawImage(coverImage, 0, 0, coverImage.width, coverImage.height, 242, 272, imageWidth, imageHeight);
     };
     coverImage.src = croppedAlbumImage.value;
 }
 
-function addGradientText(ctx, text, x, y, gradientStops, gradientWidth, maxWidth) {
+// TODO: Make this better
+function getTextLines(ctx: CanvasRenderingContext2D, text: string) {
+    const words = text.split(' ');
+    let currentLine = '';
+    const lines: string[] = [];
+    for (let i = 0; i < words.length; i++) {
+        const word = words[i];
+        if (ctx.measureText(currentLine + word).width > sidebarTextWidth) {
+            lines.push(currentLine.trim());
+            currentLine = word + ' ';
+        } else {
+            currentLine += word + ' ';
+        }
+    }
+    lines.push(currentLine.trim());
+    if (lines[0] === '') {
+        lines.shift();
+    }
+    return lines;
+}
+
+function addGradientLongText(ctx: CanvasRenderingContext2D, text: string, x: number, y: any, gradientStops: any, gradientWidth: any, lineHeight: number, indentation = 12) {
+    const words = text.split(' ');
+    let linesPrinted = 0;
+    let currentLine = '';
+    let currentY = y;
+    for (let i = 0; i < words.length; i++) {
+        const word = words[i];
+        const currentIndentation = linesPrinted == 0 ? 0 : indentation;
+        if (ctx.measureText(currentLine + word).width > sidebarTextWidth - currentIndentation) {
+            addGradientText(ctx, currentLine, x + currentIndentation, currentY, gradientStops, gradientWidth);
+            currentLine = word + ' ';
+            if (i > 0) {
+                linesPrinted++;
+                currentY += lineHeight;
+            }
+        } else {
+            currentLine += word + ' ';
+        }
+    }
+    addGradientText(ctx, currentLine, x + (linesPrinted == 0 ? 0 : indentation), currentY, gradientStops, gradientWidth);
+    linesPrinted++;
+    return linesPrinted;
+}
+
+function addGradientText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, gradientStops: any[], gradientWidth: number) {
+    console.log(arguments);
     if (isDarkTheme.value) {
         ctx.fillStyle = '#e9e8e4';
     } else {
         const gradient = ctx.createLinearGradient(x, 0, x + gradientWidth, 0);
-        gradientStops.forEach(stop => gradient.addColorStop(stop.offset, stop.color));
+        gradientStops.forEach((stop: { offset: any; color: any; }) => gradient.addColorStop(stop.offset, stop.color));
         // Fill with gradient
         ctx.fillStyle = gradient;
     }
-    ctx.fillText(text, x, y, maxWidth);
+    ctx.fillText(text, x, y, sidebarTextWidth);
 }
 
-function textUnderline(context, text, x, y, textSize, gradientStops) {
+function textUnderline(context: CanvasRenderingContext2D, text: string, x: number, y: number, textSize: number, gradientStops: any[]) {
     const textWidth = context.measureText(text).width;
     let startX;
     const startY = y + (textSize / 15) + 2;
@@ -496,7 +692,7 @@ function textUnderline(context, text, x, y, textSize, gradientStops) {
         context.strokeStyle = '#e9e8e4';
     } else {
         const gradient = context.createLinearGradient(x, 0, x + textWidth, 0);
-        gradientStops.forEach(stop => gradient.addColorStop(stop.offset, stop.color));
+        gradientStops.forEach((stop: { offset: any; color: any; }) => gradient.addColorStop(stop.offset, stop.color));
         context.strokeStyle = gradient;
     }
     // noinspection JSSuspiciousNameCombination
@@ -512,7 +708,7 @@ function textUnderline(context, text, x, y, textSize, gradientStops) {
  * @param {number} aspectRatio - The aspect ratio
  * @return {Promise<HTMLCanvasElement>} A Promise that resolves with the resulting image as a canvas element
  */
-function crop(url, aspectRatio) {
+function crop(url: string, aspectRatio: number): Promise<HTMLCanvasElement> {
     // we return a Promise that gets resolved with our canvas element
     return new Promise((resolve) => {
         // this image will hold our source image data
@@ -548,7 +744,7 @@ function crop(url, aspectRatio) {
             outputImage.height = outputHeight;
 
             // draw our image at position 0, 0 on the canvas
-            const ctx = outputImage.getContext('2d');
+            const ctx = outputImage.getContext('2d')!;
             ctx.drawImage(inputImage, outputX, outputY);
             resolve(outputImage);
         };
@@ -560,10 +756,8 @@ function crop(url, aspectRatio) {
 
 /**
  * https://lucidar.me/en/web-dev/how-to-slugify-a-string-in-javascript/
- * @param str
- * @returns {string}
  */
-function slugify(str) {
+function slugify(str: string): string {
     str = str.replace(/^\s+|\s+$/g, '');
 
     // Make the string lowercase
