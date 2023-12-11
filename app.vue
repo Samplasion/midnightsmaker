@@ -137,17 +137,19 @@
                             v-model="albumSubtitle"
                         />
                     </label>
-                    <label class="block">
-                        <span class="text-gray-700 dark:text-gray-300">Album Image</span>
-                        <input
-                            type="file"
-                            accept="image/x-png,image/gif,image/jpeg,image/webp"
-                            class="text-sm mt-1 pr-1 block w-full rounded-md bg-gray-100 dark:bg-gray-800 border-transparent cursor-pointer max-w-[250px]
-                            focus:border-gray-500 focus:bg-white dark:focus:bg-black focus:ring-0 focus:outline-none
-                            file:rounded-md file:border file:cursor-pointer file:p-2"
-                            @change="onImageChosen"
-                        />
-                    </label>
+                    <div>
+                        <label class="block">
+                            <span class="text-gray-700 dark:text-gray-300">Album Image</span>
+                            <input
+                                type="file"
+                                accept="image/x-png,image/gif,image/jpeg,image/webp"
+                                class="text-sm mt-1 pr-1 block w-full rounded-md bg-gray-100 dark:bg-gray-800 border-transparent cursor-pointer max-w-[250px]
+                                focus:border-gray-500 focus:bg-white dark:focus:bg-black focus:ring-0 focus:outline-none
+                                file:rounded-md file:border file:cursor-pointer file:p-2"
+                                @change="onImageChosen"
+                            />
+                        </label>
+                    </div>
                     <div v-for="(section, index) in sections" :key="index">
                         <div>
                             <label class="block">
@@ -202,12 +204,14 @@
                             Remove Section
                         </button>
                     </div>
-                    <button
-                        class="px-6 py-2 bg-green-600 text-white font-medium text-xs leading-normal uppercase rounded shadow-sm hover:bg-green-700 hover:shadow-md focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg transition duration-150 ease-in-out flex align-center"
-                        @click="addSection"
-                    >
-                        Add Section
-                    </button>
+                    <div>
+                        <button
+                            class="px-6 py-2 bg-green-600 text-white font-medium text-xs leading-normal uppercase rounded shadow-sm hover:bg-green-700 hover:shadow-md focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg transition duration-150 ease-in-out flex align-center"
+                            @click="addSection"
+                        >
+                            Add Section
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -221,6 +225,8 @@
 <script setup lang="ts">
 import '@cyhnkckali/vue3-color-picker/dist/style.css'
 import {Vue3ColorPicker} from '@cyhnkckali/vue3-color-picker';
+import type { Theme, ThemeKey, Section } from '~/data';
+import { predefinedThemes, defaultSections } from '~/data';
 
 // @ts-ignore
 import debounce from 'lodash.debounce';
@@ -274,153 +280,7 @@ const updateCustomForeground = (value: string) => {
 
 const themes = computed(() => {
     const themes = {
-        moonstone_blue: {
-            name: "Moonstone Blue",
-            foreground: ['#536184', '#62869a', '#88a7bb'],
-            background: ['#e9e8e4'],
-            stops: [0],
-            angle: 0,
-            preview: ['#62869a', '#62869a'],
-            official: true,
-        },
-        jade_green: {
-            name: "Jade Green",
-            foreground: ['#4e6861', '#799e98', '#87b2a9'],
-            background: ['#e9e8e4'],
-            stops: [0],
-            angle: 0,
-            preview: ['#799e98', '#799e98'],
-            customCover: "jade_green",
-            official: true,
-        },
-        blood_moon: {
-            name: "Blood Moon",
-            foreground: ['#824e4c', '#9e5653', '#ae5d59'],
-            background: ['#e9e8e4'],
-            stops: [0],
-            angle: 0,
-            preview: ['#9e5653', '#9e5653'],
-            customCover: "blood_moon",
-            official: true,
-        },
-        mahogany: {
-            name: "Mahogany",
-            foreground: ['#9c7b3d', '#b09254', '#bea162'],
-            background: ['#e9e8e4'],
-            stops: [0],
-            angle: 0,
-            preview: ['#b09254', '#b09254'],
-            customCover: "mahogany",
-            official: true,
-        },
-        lavender: {
-            name: "Lavender",
-            foreground: ['#847490', '#988a9f', '#ab9eaf'],
-            background: ['#e9e8e4'],
-            stops: [0],
-            angle: 0,
-            preview: ['#988a9f', '#988a9f'],
-            official: true,
-        },
-        tilDawn: {
-            name: 'Til Dawn Edition',
-            foreground: ['#e9e8e4'],
-            background: ['#0f0f2c', '#8c5a4c', '#604959', '#443749', '#474a5a'],
-            stops: [0, 50, 75, 85, 100],
-            angle: 75,
-            preview: ['#8c5a4c', '#604959', '#443749', '#474a5a'],
-            official: true,
-        },
-        lateNight: {
-            name: 'Late Night Edition',
-            foreground: ['#e9e8e4'],
-            background: ['#090927', '#2d475b'],
-            stops: [0, 100],
-            angle: 75,
-            preview: ['#090927', '#2d475b'],
-            official: true,
-        },
-        debut: {
-            name: 'Taylor Swift',
-            foreground: ['#11794c', '#00b0bd'],
-            background: ['#e9e8e4'],
-            stops: [0, 100],
-            angle: 75,
-            preview: ['#34f3ff', '#6aebb4'],
-            official: false,
-        },
-        fearless: {
-            name: 'Fearless',
-            foreground: ['#a5764a', '#957341'],
-            background: ['#e9e8e4'],
-            stops: [0, 100],
-            angle: 75,
-            preview: ['#f6ed95', '#ddc477'],
-            official: false,
-        },
-        speak_now: {
-            name: 'Speak Now',
-            foreground: ['#513163', '#a64477'],
-            background: ['#e9e8e4'],
-            stops: [0, 100],
-            angle: 75,
-            preview: ['#513163', '#a64477'],
-            official: false,
-        },
-        red: {
-            name: 'Red',
-            foreground: ['#692a40', '#b11a46'],
-            background: ['#e9e8e4'],
-            stops: [0, 100],
-            angle: 75,
-            preview: ['#692a40', '#b11a46'],
-            official: false,
-        },
-        nineteen_eightynine: {
-            name: '1989',
-            foreground: ['#527da0', '#6c93b2'],
-            background: ['#d7d2c5'],
-            stops: [0, 100],
-            angle: 75,
-            preview: ['#527da0', '#6c93b2'],
-            official: false,
-        },
-        reputation: {
-            name: 'reputation',
-            foreground: ['#999999', '#e9e8e4'],
-            background: ['#000000', '#222222'],
-            stops: [0, 100],
-            angle: 75,
-            preview: ['#000000', '#222222'],
-            official: false,
-        },
-        lover: {
-            name: 'Lover',
-            foreground: ['#418cd8', '#d55dad'],
-            background: ['#e9e8e4'],
-            stops: [0, 100],
-            angle: 75,
-            preview: ['#94bfe9', '#eaadd6'],
-            official: false,
-        },
-        folklore: {
-            name: 'folklore',
-            foreground: ['#222222', '#7f7f7f'],
-            background: ['#e9e8e4'],
-            stops: [0, 100],
-            angle: 75,
-            preview: ['#222222', '#7f7f7f'],
-            official: false,
-        },
-        evermore: {
-            name: 'evermore',
-            foreground: ['#523211', '#7f3c10', '#9e4c15'],
-            background: ['#e9e8e4'],
-            stops: [0, 100],
-            angle: 75,
-            preview: ['#523211', '#7f3c10', '#9e4c15'],
-            official: false,
-        },
+        ...predefinedThemes,
         custom: {
             name: 'Custom',
             foreground: [''],
@@ -456,140 +316,24 @@ const themes = computed(() => {
         official: false,
     };
 
-    return themes;
+    return themes as Record<ThemeKey, Theme>;
 });
 
-type UnwrapRef<T> = T extends Ref<infer V> ? V : T;
-type Theme = keyof UnwrapRef<typeof themes>;
-
-const themeEntries: ComputedRef<[Theme, any][]> = computed(() => Object.entries(themes.value) as any);
-const officialThemes = computed(() => themeEntries.value.filter(([key, value]) => value.official));
-const customThemes = computed(() => themeEntries.value.filter(([key, value]) => !value.official));
+const themeEntries: ComputedRef<[ThemeKey, Theme][]> = computed(() => Object.entries(themes.value) as any);
+const officialThemes = computed(() => themeEntries.value.filter(([_, value]) => value.official));
+const customThemes = computed(() => themeEntries.value.filter(([_, value]) => !value.official));
 
 const albumCoverCanvas: Ref<HTMLCanvasElement | null> = ref(null);
 const supportsClipboardApi = ref(false);
 const copyToClipboardText = ref('Copy to Clipboard');
 const croppedAlbumImage: Ref<string | null> = ref(null);
-const activeThemeName: Ref<Theme> = ref('tilDawn');
+const activeThemeName: Ref<ThemeKey> = ref('tilDawn');
+const activeTheme = computed(() => themes.value[activeThemeName.value]);
 
 const albumTitle = ref('Midnights');
 const albumSubtitle = ref('(The Til Dawn Edition)');
 const albumImage = ref('img/cover_image_moonstone_blue.jpg');
-const sections = reactive([
-    {
-        title: "",
-        tracks: [
-            {
-                name: "Lavender Haze",
-                featLine: null,
-            },
-            {
-                name: "Maroon",
-                featLine: null,
-            },
-            {
-                name: "Anti-Hero",
-                featLine: null,
-            },
-            {
-                name: "Snow On The Beach",
-                featLine: null,
-            },
-            {
-                // \u2009 is a thin space
-                name: "You're\u2009On\u2009Your\u2009Own,\u2009Kid",
-                featLine: null,
-            },
-            {
-                name: "Midnight Rain",
-                featLine: null,
-            },
-            {
-                name: "Question...?",
-                featLine: null,
-            },
-            {
-                name: "Vigilante Shit",
-                featLine: null,
-            },
-            {
-                name: "Bejeweled",
-                featLine: null,
-            },
-            {
-                name: "Labyrinth",
-                featLine: null,
-            },
-            {
-                name: "Karma",
-                featLine: null,
-            },
-            {
-                name: "Sweet Nothing",
-                featLine: null,
-            },
-            {
-                name: "Mastermind",
-                featLine: null,
-            },
-        ],
-        isSmall: false,
-    },
-    {
-        title: "3am Tracks",
-        tracks: [
-            {
-                name: "The Great War",
-                featLine: null,
-            },
-            {
-                name: "Bigger Than The Whole Sky",
-                featLine: null,
-            },
-            {
-                name: "Paris",
-                featLine: null,
-            },
-            {
-                name: "High Infidelity",
-                featLine: null,
-            },
-            {
-                name: "Glitch",
-                featLine: null,
-            },
-            {
-                name: "Would've, Could've, Should've",
-                featLine: null,
-            },
-            {
-                name: "Dear Reader",
-                featLine: null,
-            },
-        ],
-        isSmall: true,
-    },
-    {
-        title: "Til Dawn Tracks",
-        tracks: [
-            {
-                name: "Hits Different",
-                featLine: null,
-            },
-            {
-                name: "Snow On The Beach",
-                featLine: "(Feat. More Lana Del Rey)",
-            },
-            {
-                name: "Karma",
-                featLine: "(Feat. Ice Spice)",
-            },
-        ],
-        isSmall: true,
-    },
-]);
-
-const activeTheme = computed(() => themes.value[activeThemeName.value]);
+const sections = reactive([...defaultSections]);
 
 watch(albumImage, () => {
     croppedAlbumImage.value = null;
@@ -669,7 +413,6 @@ function addSection() {
         tracks: [],
         isSmall: false,
     });
-    // sections.value = [...sections.value];
 }
 
 function removeSection(sectionIndex: number) {
@@ -677,10 +420,7 @@ function removeSection(sectionIndex: number) {
 }
 
 function addTrack(sectionIndex: number) {
-    sections[sectionIndex].tracks.push({
-        name: 'New Track',
-        featLine: null,
-    });
+    sections[sectionIndex].tracks.push({name: 'New Track'});
 }
 
 function removeTrack(sectionIndex: number, trackIndex: number) {
@@ -733,7 +473,6 @@ async function render() {
         watermarkGradient.push({ offset: 1, color: activeTheme.value.foreground[0] });
     }
     ctx.font = `300 16px ${font}`;
-    console.log(activeTheme.value);
     addGradientText(ctx, 'made with midnightsmaker.com', 10, 24, watermarkGradient, ctx.measureText('made with midnightsmaker.com').width);
 
     // album title
@@ -787,7 +526,6 @@ async function render() {
     const boldFont = (isSmall: boolean) => isSmall ? `500 ${smallFontSize}px ${font}` : `500 ${bigFontSize}px ${font}`;
     const regularFont = (isSmall: boolean) => isSmall ? `400 ${smallFontSize}px ${font}` : `400 ${bigFontSize}px ${font}`;
 
-    console.log(sections.flatMap(section => [section.title, ...section.tracks.map(track => track.name)]).map(text => ctx.measureText(text).width));
     const sideGradientWidth = Math.max(...sections.flatMap(section => [section.title, ...section.tracks.map(track => track.name)]).map(text => ctx.measureText(text).width));
 
     const previousFontData = ctx.font;
