@@ -537,6 +537,8 @@ async function render() {
         section.tracks.forEach((track) => {
             ctx.font = boldFont(section.isSmall);
             const titleLength = track.name ? ctx.measureText(track.name).width : 0;
+            currentHeight += trackTitleHeight(!!section.isSmall) *
+                Math.max(1, getTextLines(ctx, track.name).length);
             ctx.font = regularFont(section.isSmall);
             const spaceLength = ctx.measureText((titleLength ? " " : "")).width;
             const featLineLength = ctx.measureText(track.featLine!).width;
@@ -544,8 +546,6 @@ async function render() {
                 currentHeight += trackTitleHeight(!!section.isSmall) * (
                     getTextLines(ctx, track.featLine ?? "").length);
             }
-            currentHeight += trackTitleHeight(!!section.isSmall) *
-                Math.max(1, getTextLines(ctx, track.name).length);
         });
         currentHeight += afterSectionSpacing(!!section.isSmall);
         return acc + currentHeight;
@@ -585,7 +585,7 @@ async function render() {
                         ctx, 
                         section.tracks[i].featLine!,
                         sidebarTextX,
-                        currentSectionStart + sectionTitleHeight(section.isSmall) + trackTitleHeight(section.isSmall) * (lines + 1),
+                        currentSectionStart + sectionTitleHeight(section.isSmall) + trackTitleHeight(section.isSmall) * (lines + newLines),
                         sideGradient, sideGradientWidth,
                         trackTitleHeight(section.isSmall),
                     );
