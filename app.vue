@@ -61,7 +61,10 @@
             </div>
             <div class="md:mr-3 mt-5 md:mt-0 mb-5 flex-col">
                 <div class="text-xs mb-5">
-                    <span class="block text-gray-700 dark:text-gray-300">Official themes</span>
+                    <span class="block text-gray-700 dark:text-gray-300">
+                        Official themes
+                        <span v-if="themes[activeThemeName].official">[{{ themes[activeThemeName].name }}]</span>
+                    </span>
                     <button v-for="([key, value]) of officialThemes" :key="key"
                         :title="value.name"
                         class="inline-block rounded-full h-6 w-6 transition duration-200 mt-1 align-top mr-2 cursor-pointer"
@@ -71,7 +74,10 @@
                     />
                 </div>
                 <div class="text-xs mb-5">
-                    <span class="block text-gray-700 dark:text-gray-300">Custom themes</span>
+                    <span class="block text-gray-700 dark:text-gray-300">
+                        Custom themes
+                        <span v-if="!themes[activeThemeName].official">[{{ themes[activeThemeName].name }}]</span>
+                    </span>
                     <button v-for="([key, value]) of customThemes" :key="key"
                         :title="value.name"
                         class="inline-block rounded-full h-6 w-6 transition duration-200 mt-1 align-top mr-2 cursor-pointer"
