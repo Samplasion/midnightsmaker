@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="dark:bg-gray-900 dark:text-gray-200">
         <Head>
             <Title>Midnights Maker</Title>
             <Meta property="og:title" content="Midnights Maker"/>
@@ -34,7 +34,7 @@
                     <button
                         v-if="supportsClipboardApi"
                         type="button"
-                        class="inline-block mr-2 px-6 py-2 border-2 border-gray-800 text-gray-800 font-medium text-xs leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0 transition duration-150 ease-in-out flex align-center"
+                        class="inline-block mr-2 px-6 py-2 border-2 border-gray-800 text-gray-800 dark:border-gray-200 dark:text-gray-200 font-medium text-xs leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0 transition duration-150 ease-in-out flex align-center"
                         @click="copyToClipboard"
                     >
                         <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="clipboard"
@@ -61,28 +61,28 @@
             </div>
             <div class="md:mr-3 mt-5 md:mt-0 mb-5 flex-col">
                 <div class="text-xs mb-5">
-                    <span class="block text-gray-700">Official themes</span>
+                    <span class="block text-gray-700 dark:text-gray-300">Official themes</span>
                     <button v-for="([key, value]) of officialThemes" :key="key"
                         :title="value.name"
                         class="inline-block rounded-full h-6 w-6 transition duration-200 mt-1 align-top mr-2 cursor-pointer"
-                        :class="{ 'outline outline-2 outline-black': activeThemeName === key }"
+                        :class="{ 'outline outline-2 outline-black dark:outline-white': activeThemeName === key }"
                         @click="activeThemeName = key"
                         :style="`background-image: linear-gradient(to bottom right, ${value.preview.join(', ')});`"
                     />
                 </div>
                 <div class="text-xs mb-5">
-                    <span class="block text-gray-700">Custom themes</span>
+                    <span class="block text-gray-700 dark:text-gray-300">Custom themes</span>
                     <button v-for="([key, value]) of customThemes" :key="key"
                         :title="value.name"
                         class="inline-block rounded-full h-6 w-6 transition duration-200 mt-1 align-top mr-2 cursor-pointer"
-                        :class="{ 'outline outline-2 outline-black': activeThemeName === key }"
+                        :class="{ 'outline outline-2 outline-black dark:outline-white': activeThemeName === key }"
                         @click="activeThemeName = key"
                         :style="`background-image: linear-gradient(to bottom right, ${value.preview.join(', ')});`"
                     />
                 </div>
                 <div class="text-xs mb-5" v-if="activeThemeName === 'custom'">
-                    <span class="text-gray-700" v-if="isUpdatingCustomBackground">Album background colors</span>
-                    <span class="text-gray-700" v-if="isUpdatingCustomForeground">Album foreground colors</span>
+                    <span class="text-gray-700 dark:text-gray-300" v-if="isUpdatingCustomBackground">Album background colors</span>
+                    <span class="text-gray-700 dark:text-gray-300" v-if="isUpdatingCustomForeground">Album foreground colors</span>
                     <Vue3ColorPicker
                         v-model="customBackgroundRaw"
                         v-if="isUpdatingCustomBackground"
@@ -92,6 +92,7 @@
                         :showAlpha="false"
                         :showColorValue="false"
                         :showInputMenu="false"
+                        theme="dark"
                         @update:modelValue="updateCustomBackground"
                     />
                     <Vue3ColorPicker
@@ -103,10 +104,11 @@
                         :showAlpha="false"
                         :showColorValue="false"
                         :showInputMenu="false"
+                        theme="dark"
                         @update:modelValue="updateCustomForeground"
                     />
                     <button
-                        class="px-6 py-2 border-gray-800 text-gray-800 font-medium text-xs leading-normal uppercase rounded shadow-sm hover:bg-gray-700 hover:shadow-md focus:bg-gray-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-800 active:shadow-lg transition duration-150 ease-in-out flex align-center"
+                        class="px-6 py-2 border-gray-800 text-gray-800 dark:border-gray-200 dark:text-gray-200 font-medium text-xs leading-normal uppercase rounded shadow-sm hover:bg-gray-700 hover:shadow-md focus:bg-gray-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-800 active:shadow-lg transition duration-150 ease-in-out flex align-center"
                         @click="toggle"
                     >
                         Toggle edit background/text
@@ -114,28 +116,28 @@
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
                     <label class="block">
-                        <span class="text-gray-700">Album Title</span>
+                        <span class="text-gray-700 dark:text-gray-300">Album Title</span>
                         <input
                             type="text"
-                            class="text-sm mt-1 block w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0"
+                            class="text-sm mt-1 block w-full rounded-md bg-gray-100 dark:bg-gray-800 border-transparent focus:border-gray-500 focus:bg-white dark:focus:bg-black focus:ring-0"
                             v-model="albumTitle"
                         />
                     </label>
                     <label class="block">
-                        <span class="text-gray-700">Album Subtitle</span>
+                        <span class="text-gray-700 dark:text-gray-300">Album Subtitle</span>
                         <input
                             type="text"
-                            class="text-sm mt-1 block w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0"
+                            class="text-sm mt-1 block w-full rounded-md bg-gray-100 dark:bg-gray-800 border-transparent focus:border-gray-500 focus:bg-white dark:focus:bg-black focus:ring-0"
                             v-model="albumSubtitle"
                         />
                     </label>
                     <label class="block">
-                        <span class="text-gray-700">Album Image</span>
+                        <span class="text-gray-700 dark:text-gray-300">Album Image</span>
                         <input
                             type="file"
                             accept="image/x-png,image/gif,image/jpeg,image/webp"
-                            class="text-sm mt-1 pr-1 block w-full rounded-md bg-gray-100 border-transparent cursor-pointer max-w-[250px]
-                            focus:border-gray-500 focus:bg-white focus:ring-0 focus:outline-none
+                            class="text-sm mt-1 pr-1 block w-full rounded-md bg-gray-100 dark:bg-gray-800 border-transparent cursor-pointer max-w-[250px]
+                            focus:border-gray-500 focus:bg-white dark:focus:bg-black focus:ring-0 focus:outline-none
                             file:rounded-md file:border file:cursor-pointer file:p-2"
                             @change="onImageChosen"
                         />
@@ -143,37 +145,37 @@
                     <div v-for="(section, index) in sections" :key="index">
                         <div>
                             <label class="block">
-                                <span class="text-gray-700">Section Title</span>
+                                <span class="text-gray-700 dark:text-gray-300">Section Title</span>
                                 <input
                                     type="text"
-                                    class="text-sm mt-1 block w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0"
+                                    class="text-sm mt-1 block w-full rounded-md bg-gray-100 dark:bg-gray-800 border-transparent focus:border-gray-500 focus:bg-white dark:focus:bg-black focus:ring-0"
                                     v-model="sections[index].title"
                                 />
                             </label>
                             <div v-for="(track, tIndex) in section.tracks" :key="tIndex" class="mt-2 ml-4">
                                 <label class="block">
-                                    <span class="text-gray-700">Track Title</span>
+                                    <span class="text-gray-700 dark:text-gray-300">Track Title</span>
                                     <input
                                         type="text"
-                                        class="text-sm mt-1 block w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0"
+                                        class="text-sm mt-1 block w-full rounded-md bg-gray-100 dark:bg-gray-800 border-transparent focus:border-gray-500 focus:bg-white dark:focus:bg-black focus:ring-0"
                                         v-model="sections[index].tracks[tIndex].name"
                                     />
-                                    <span class="text-gray-700">Track Feat. Line</span>
+                                    <span class="text-gray-700 dark:text-gray-300">Track Feat. Line</span>
                                     <input
                                         type="text"
-                                        class="text-sm mt-1 block w-full rounded-md bg-gray-100 border-transparent focus:border-gray-500 focus:bg-white focus:ring-0"
+                                        class="text-sm mt-1 block w-full rounded-md bg-gray-100 dark:bg-gray-800 border-transparent focus:border-gray-500 focus:bg-white dark:focus:bg-black focus:ring-0"
                                         v-model="sections[index].tracks[tIndex].featLine"
                                     />
                                 </label>
                                 <button
-                                    class="px-6 py-2 border-gray-800 text-gray-800 font-medium text-xs leading-normal uppercase rounded shadow-sm hover:bg-red-700 hover:shadow-md focus:bg-red-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-red-800 active:shadow-lg transition duration-150 ease-in-out flex align-center"
+                                    class="px-6 py-2 border-solid border-1 border-gray-800 text-gray-800 dark:border-gray-200 dark:text-gray-200 font-medium text-xs leading-normal uppercase rounded shadow-sm hover:bg-red-700 hover:shadow-md focus:bg-red-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-red-800 active:shadow-lg transition duration-150 ease-in-out flex align-center"
                                     @click="removeTrack(index, tIndex)"
                                 >
                                     Remove
                                 </button>
                             </div>
                             <button
-                                class="px-6 py-2 border-gray-800 text-gray-800 font-medium text-xs leading-normal uppercase rounded shadow-sm hover:bg-green-700 hover:shadow-md focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg transition duration-150 ease-in-out flex align-center"
+                                class="px-6 py-2 border-solid border-1 border-gray-800 text-gray-800 dark:border-gray-200 dark:text-gray-200 font-medium text-xs leading-normal uppercase rounded shadow-sm hover:bg-green-700 hover:shadow-md focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg transition duration-150 ease-in-out flex align-center"
                                 @click="addTrack(index)"
                             >
                                 Add Track
@@ -185,10 +187,10 @@
                                 class="mt-2"
                                 v-model="sections[index].isSmall"
                             />
-                            <span class="ml-2 text-gray-700">Small Section</span>
+                            <span class="ml-2 text-gray-700 dark:text-gray-300">Small Section</span>
                         </label>
                         <button
-                            class="px-6 py-2 border-gray-800 text-gray-800 font-medium text-xs leading-normal uppercase rounded shadow-sm hover:bg-red-700 hover:shadow-md focus:bg-red-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-red-800 active:shadow-lg transition duration-150 ease-in-out flex align-center"
+                            class="px-6 py-2 border-gray-800 text-gray-800 dark:border-gray-200 dark:text-gray-200 font-medium text-xs leading-normal uppercase rounded shadow-sm hover:bg-red-700 hover:shadow-md focus:bg-red-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-red-800 active:shadow-lg transition duration-150 ease-in-out flex align-center"
                             @click="removeSection(index)"
                         >
                             Remove Section
@@ -214,7 +216,6 @@
 import '@cyhnkckali/vue3-color-picker/dist/style.css'
 import {Vue3ColorPicker} from '@cyhnkckali/vue3-color-picker';
 
-// TODO: darkreader
 // @ts-ignore
 import debounce from 'lodash.debounce';
 
@@ -608,6 +609,8 @@ watch([
 });
 
 onMounted(async () => {
+    document.querySelector("body")?.classList.add("dark:bg-gray-900", "dark:text-gray-200");
+
     // @ts-ignore
     window.WebFontConfig = {
         google: {
