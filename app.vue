@@ -61,14 +61,56 @@
             </div>
             <div class="md:mr-3 mt-5 md:mt-0 mb-5 flex-col">
                 <div class="text-xs mb-5">
-                    <span class="block text-gray-700">Theme</span>
-                    <button v-for="([key, value]) of themeEntries" :key="key"
+                    <span class="block text-gray-700">Official themes</span>
+                    <button v-for="([key, value]) of officialThemes" :key="key"
                         :title="value.name"
                         class="inline-block rounded-full h-6 w-6 transition duration-200 mt-1 align-top mr-2 cursor-pointer"
                         :class="{ 'outline outline-2 outline-black': activeThemeName === key }"
-                        :style="`background-image: linear-gradient(to bottom right, ${value.colors.join(', ')});`"
                         @click="activeThemeName = key"
+                        :style="`background-image: linear-gradient(to bottom right, ${value.preview.join(', ')});`"
                     />
+                </div>
+                <div class="text-xs mb-5">
+                    <span class="block text-gray-700">Custom themes</span>
+                    <button v-for="([key, value]) of customThemes" :key="key"
+                        :title="value.name"
+                        class="inline-block rounded-full h-6 w-6 transition duration-200 mt-1 align-top mr-2 cursor-pointer"
+                        :class="{ 'outline outline-2 outline-black': activeThemeName === key }"
+                        @click="activeThemeName = key"
+                        :style="`background-image: linear-gradient(to bottom right, ${value.preview.join(', ')});`"
+                    />
+                </div>
+                <div class="text-xs mb-5" v-if="activeThemeName === 'custom'">
+                    <span class="text-gray-700" v-if="isUpdatingCustomBackground">Album background colors</span>
+                    <span class="text-gray-700" v-if="isUpdatingCustomForeground">Album foreground colors</span>
+                    <Vue3ColorPicker
+                        v-model="customBackgroundRaw"
+                        v-if="isUpdatingCustomBackground"
+                        mode="gradient"
+                        :showColorList="false"
+                        :showEyeDrop="false"
+                        :showAlpha="false"
+                        :showColorValue="false"
+                        :showInputMenu="false"
+                        @update:modelValue="updateCustomBackground"
+                    />
+                    <Vue3ColorPicker
+                        v-model="customForegroundRaw"
+                        v-if="isUpdatingCustomForeground"
+                        mode="gradient"
+                        :showColorList="false"
+                        :showEyeDrop="false"
+                        :showAlpha="false"
+                        :showColorValue="false"
+                        :showInputMenu="false"
+                        @update:modelValue="updateCustomForeground"
+                    />
+                    <button
+                        class="px-6 py-2 border-gray-800 text-gray-800 font-medium text-xs leading-normal uppercase rounded shadow-sm hover:bg-gray-700 hover:shadow-md focus:bg-gray-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-800 active:shadow-lg transition duration-150 ease-in-out flex align-center"
+                        @click="toggle"
+                    >
+                        Toggle edit background/text
+                    </button>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
                     <label class="block">
@@ -169,6 +211,9 @@
 </template>
 
 <script setup lang="ts">
+import '@cyhnkckali/vue3-color-picker/dist/style.css'
+import {Vue3ColorPicker} from '@cyhnkckali/vue3-color-picker';
+
 // TODO: darkreader
 // @ts-ignore
 import debounce from 'lodash.debounce';
@@ -178,47 +223,241 @@ const sidebarTextX = 24;
 const sidebarTextWidth = coverX - sidebarTextX;
 
 const debouncedRender = debounce(render, 300);
-const themes = {
-    moonstone_blue: {
-        name: "Moonstone Blue",
-        colors: ['#536184', '#62869a', '#88a7bb'],
-    },
-    jade_green: {
-        name: "Jade Green",
-        colors: ['#4e6861', '#799e98', '#87b2a9'],
-    },
-    blood_moon: {
-        name: "Blood Moon",
-        colors: ['#824e4c', '#9e5653', '#ae5d59'],
-    },
-    mahogany: {
-        name: "Mahogany",
-        colors: ['#9c7b3d', '#b09254', '#bea162'],
-    },
-    lavender: {
-        name: "Lavender",
-        colors: ['#847490', '#988a9f', '#ab9eaf'],
-    },
+const customBackground = reactive({
+    type: 'linear',
+    degree: 0,
+    points: [] as Record<"left" | "red" | "green" | "blue" | "alpha", number>[],
+});
+const customForeground = reactive({
+    points: [] as Record<"left" | "red" | "green" | "blue" | "alpha", number>[],
+});
+
+const isUpdatingCustomBackground = ref(true);
+const isUpdatingCustomForeground = ref(false);
+const toggle = () => {
+    isUpdatingCustomBackground.value = !isUpdatingCustomBackground.value;
+    isUpdatingCustomForeground.value = !isUpdatingCustomForeground.value;
+};
+const customBackgroundRaw = ref("linear-gradient(0deg, rgb(242, 196, 208) 0%, rgb(113, 188, 217) 100%)");
+const customForegroundRaw = ref("linear-gradient(0deg, rgb(27, 80, 101) 0%, rgb(191, 78, 131) 100%)");
+const updateCustomBackground = (value: string) => {
+    const points = [...value.matchAll(/rgb\((\d+), (\d+), (\d+)\) (\d{1,3})%/g)];
+    const degree = parseInt(value.match(/(\d+)deg/g)![0]);
+    customBackground.points = points.map(point => ({
+        left: parseInt(point[4]),
+        red: parseInt(point[1]),
+        green: parseInt(point[2]),
+        blue: parseInt(point[3]),
+        alpha: 1,
+    }));
+    customBackground.degree = degree;
+    render();
+};
+const updateCustomForeground = (value: string) => {
+    const points = [...value.matchAll(/rgb\((\d+), (\d+), (\d+)\) (\d{1,3})%/g)];
+    customForeground.points = points.map(point => ({
+        left: parseInt(point[4]),
+        red: parseInt(point[1]),
+        green: parseInt(point[2]),
+        blue: parseInt(point[3]),
+        alpha: 1,
+    }));
+    render();
 };
 
-const darkThemes = {
-    tilDawn: {
-        name: 'Til Dawn Edition',
-        colors: ['#0f0f2c', '#8c5a4c', '#604959', '#443749', '#474a5a'],
-        stops: [0, 50, 75, 85, 100],
-        angle: 75,
-    },
-    lateNight: {
-        name: 'Late Night Edition',
-        colors: ['#090927', '#2d475b'],
-        stops: [0, 100],
-        angle: 75,
-    },
-};
+const themes = computed(() => {
+    const themes = {
+        moonstone_blue: {
+            name: "Moonstone Blue",
+            foreground: ['#536184', '#62869a', '#88a7bb'],
+            background: ['#e9e8e4'],
+            stops: [0],
+            angle: 0,
+            preview: ['#62869a', '#62869a'],
+            official: true,
+        },
+        jade_green: {
+            name: "Jade Green",
+            foreground: ['#4e6861', '#799e98', '#87b2a9'],
+            background: ['#e9e8e4'],
+            stops: [0],
+            angle: 0,
+            preview: ['#799e98', '#799e98'],
+            customCover: "jade_green",
+            official: true,
+        },
+        blood_moon: {
+            name: "Blood Moon",
+            foreground: ['#824e4c', '#9e5653', '#ae5d59'],
+            background: ['#e9e8e4'],
+            stops: [0],
+            angle: 0,
+            preview: ['#9e5653', '#9e5653'],
+            customCover: "blood_moon",
+            official: true,
+        },
+        mahogany: {
+            name: "Mahogany",
+            foreground: ['#9c7b3d', '#b09254', '#bea162'],
+            background: ['#e9e8e4'],
+            stops: [0],
+            angle: 0,
+            preview: ['#b09254', '#b09254'],
+            customCover: "mahogany",
+            official: true,
+        },
+        lavender: {
+            name: "Lavender",
+            foreground: ['#847490', '#988a9f', '#ab9eaf'],
+            background: ['#e9e8e4'],
+            stops: [0],
+            angle: 0,
+            preview: ['#988a9f', '#988a9f'],
+            official: true,
+        },
+        tilDawn: {
+            name: 'Til Dawn Edition',
+            foreground: ['#e9e8e4'],
+            background: ['#0f0f2c', '#8c5a4c', '#604959', '#443749', '#474a5a'],
+            stops: [0, 50, 75, 85, 100],
+            angle: 75,
+            preview: ['#8c5a4c', '#604959', '#443749', '#474a5a'],
+            official: true,
+        },
+        lateNight: {
+            name: 'Late Night Edition',
+            foreground: ['#e9e8e4'],
+            background: ['#090927', '#2d475b'],
+            stops: [0, 100],
+            angle: 75,
+            preview: ['#090927', '#2d475b'],
+            official: true,
+        },
+        debut: {
+            name: 'Taylor Swift',
+            foreground: ['#11794c', '#00b0bd'],
+            background: ['#e9e8e4'],
+            stops: [0, 100],
+            angle: 75,
+            preview: ['#34f3ff', '#6aebb4'],
+            official: false,
+        },
+        fearless: {
+            name: 'Fearless',
+            foreground: ['#a5764a', '#957341'],
+            background: ['#e9e8e4'],
+            stops: [0, 100],
+            angle: 75,
+            preview: ['#f6ed95', '#ddc477'],
+            official: false,
+        },
+        speak_now: {
+            name: 'Speak Now',
+            foreground: ['#513163', '#a64477'],
+            background: ['#e9e8e4'],
+            stops: [0, 100],
+            angle: 75,
+            preview: ['#513163', '#a64477'],
+            official: false,
+        },
+        red: {
+            name: 'Red',
+            foreground: ['#692a40', '#b11a46'],
+            background: ['#e9e8e4'],
+            stops: [0, 100],
+            angle: 75,
+            preview: ['#692a40', '#b11a46'],
+            official: false,
+        },
+        nineteen_eightynine: {
+            name: '1989',
+            foreground: ['#527da0', '#6c93b2'],
+            background: ['#d7d2c5'],
+            stops: [0, 100],
+            angle: 75,
+            preview: ['#527da0', '#6c93b2'],
+            official: false,
+        },
+        reputation: {
+            name: 'reputation',
+            foreground: ['#999999', '#e9e8e4'],
+            background: ['#000000', '#222222'],
+            stops: [0, 100],
+            angle: 75,
+            preview: ['#000000', '#222222'],
+            official: false,
+        },
+        lover: {
+            name: 'Lover',
+            foreground: ['#418cd8', '#d55dad'],
+            background: ['#e9e8e4'],
+            stops: [0, 100],
+            angle: 75,
+            preview: ['#94bfe9', '#eaadd6'],
+            official: false,
+        },
+        folklore: {
+            name: 'folklore',
+            foreground: ['#222222', '#7f7f7f'],
+            background: ['#e9e8e4'],
+            stops: [0, 100],
+            angle: 75,
+            preview: ['#222222', '#7f7f7f'],
+            official: false,
+        },
+        evermore: {
+            name: 'evermore',
+            foreground: ['#523211', '#7f3c10', '#9e4c15'],
+            background: ['#e9e8e4'],
+            stops: [0, 100],
+            angle: 75,
+            preview: ['#523211', '#7f3c10', '#9e4c15'],
+            official: false,
+        },
+        custom: {
+            name: 'Custom',
+            foreground: [''],
+            background: [''],
+            stops: [0],
+            angle: 0,
+            preview: [''],
+            official: false,
+        },
+    };
 
-type Theme = keyof typeof themes | keyof typeof darkThemes;
+    const foregroundColors = [];
+    for (let i = 0; i < customForeground.points.length; i++) {
+        const point = customForeground.points[i];
+        foregroundColors.push(`rgb(${point.red}, ${point.green}, ${point.blue})`);
+    }
 
-const themeEntries: [Theme, any][] = Object.entries({...themes, ...darkThemes}) as any;
+    const backgroundColors = [];
+    const stops = [];
+    for (let i = 0; i < customBackground.points.length; i++) {
+        const point = customBackground.points[i];
+        backgroundColors.push(`rgb(${point.red}, ${point.green}, ${point.blue})`);
+        stops.push(point.left);
+    }
+
+    themes.custom = {
+        name: "Custom",
+        foreground: foregroundColors,
+        background: backgroundColors,
+        stops,
+        angle: customBackground.degree,
+        preview: backgroundColors,
+        official: false,
+    };
+
+    return themes;
+});
+
+type UnwrapRef<T> = T extends Ref<infer V> ? V : T;
+type Theme = keyof UnwrapRef<typeof themes>;
+
+const themeEntries: ComputedRef<[Theme, any][]> = computed(() => Object.entries(themes.value) as any);
+const officialThemes = computed(() => themeEntries.value.filter(([key, value]) => value.official));
+const customThemes = computed(() => themeEntries.value.filter(([key, value]) => !value.official));
 
 const albumCoverCanvas: Ref<HTMLCanvasElement | null> = ref(null);
 const supportsClipboardApi = ref(false);
@@ -343,9 +582,7 @@ const sections = reactive([
     },
 ]);
 
-// @ts-ignore
-const activeTheme = computed(() => themes[activeThemeName.value] ?? darkThemes[activeThemeName.value]);
-const isDarkTheme = computed(() => activeThemeName.value in darkThemes);
+const activeTheme = computed(() => themes.value[activeThemeName.value]);
 
 watch(albumImage, () => {
     croppedAlbumImage.value = null;
@@ -354,10 +591,10 @@ watch(activeThemeName, () => {
     if (!albumImage.value.startsWith('img/')) {
         return;
     }
-    if (['lavender', ...Object.keys(darkThemes)].includes(activeThemeName.value)) {
-        albumImage.value = `img/cover_image_moonstone_blue.jpg`;
+    if ("customCover" in activeTheme.value) {
+        albumImage.value = `img/cover_image_${activeTheme.value.customCover}.jpg`;
     } else {
-        albumImage.value = `img/cover_image_${activeThemeName.value}.jpg`;
+        albumImage.value = `img/cover_image_moonstone_blue.jpg`;
     }
 });
 watch([
@@ -391,6 +628,9 @@ onMounted(async () => {
     }
 
     supportsClipboardApi.value = typeof ClipboardItem === 'function';
+
+    updateCustomBackground(customBackgroundRaw.value);
+    updateCustomForeground(customForegroundRaw.value);
 });
 
 function copyToClipboard() {
@@ -449,6 +689,7 @@ function onImageChosen(e: any) {
     reader.readAsDataURL(e.target.files[0]);
 }
 
+let coverImage: HTMLImageElement | null = null;
 async function render() {
     const canvas = albumCoverCanvas.value!;
     const letterSpacing = canvas.style.letterSpacing;
@@ -460,42 +701,47 @@ async function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // background color
-    if (isDarkTheme.value) {
-        const angle = activeTheme.value.angle * Math.PI / 180;
-        var x2 = canvas.width * Math.cos(angle);  // angle in radians
-        var y2 = canvas.height * Math.sin(angle);  // angle in radians
-        const gradient = ctx.createLinearGradient(0, 0, x2, y2);
-        for (let i = 0; i < activeTheme.value.colors.length; i++) {
-            gradient.addColorStop(activeTheme.value.stops[i] / 100, activeTheme.value.colors[i]);
-        }
-        ctx.fillStyle = gradient;
-    } else {
-        ctx.fillStyle = '#e9e8e4';
+    const angle = activeTheme.value.angle * Math.PI / 180;
+    var x2 = canvas.width * Math.cos(angle);  // angle in radians
+    var y2 = canvas.height * Math.sin(angle);  // angle in radians
+    const bgGradient = ctx.createLinearGradient(0, 0, x2, y2);
+    for (let i = 0; i < activeTheme.value.background.length; i++) {
+        bgGradient.addColorStop(activeTheme.value.stops[i] / 100, activeTheme.value.background[i]);
     }
+    ctx.fillStyle = bgGradient;
     ctx.fillRect(0,0, canvas.width, canvas.height);
 
     // watermark
-    if (isDarkTheme.value) {
-        ctx.fillStyle = `#e9e8e46F`;
+    const watermarkGradient: {offset: number, color: string}[] = [];
+
+    watermarkGradient.push({ offset: 0, color: activeTheme.value.foreground[0] });
+    if (activeTheme.value.foreground.length > 2) {
+        watermarkGradient.push({ offset: 0.25, color: activeTheme.value.foreground[1] });
+        watermarkGradient.push({ offset: 1, color: activeTheme.value.foreground[2] });
+    } else if (activeTheme.value.foreground.length > 1) {
+        watermarkGradient.push({ offset: 1, color: activeTheme.value.foreground[1] });
     } else {
-        ctx.fillStyle = `${activeTheme.value.colors[1]}6F`;
+        watermarkGradient.push({ offset: 1, color: activeTheme.value.foreground[0] });
     }
     ctx.font = `300 16px ${font}`;
-    ctx.fillText('made with midnightsmaker.com', 10, 24);
+    console.log(activeTheme.value);
+    addGradientText(ctx, 'made with midnightsmaker.com', 10, 24, watermarkGradient, ctx.measureText('made with midnightsmaker.com').width);
 
     // album title
     canvas.style.letterSpacing = '-2.3px';
     ctx.font = `700 78px ${font}`;
     // gradient for album title
-    if (!isDarkTheme.value) {
-        const gradient = ctx.createLinearGradient(233, 0, 233 + ctx.measureText(albumTitle.value).width, 0);
-        gradient.addColorStop(0,activeTheme.value.colors[0]);
-        gradient.addColorStop(0.45, activeTheme.value.colors[1]);
-        gradient.addColorStop(1, activeTheme.value.colors[2]);
-        ctx.fillStyle = gradient;
+    const fgGradient = ctx.createLinearGradient(233, 0, 233 + ctx.measureText(albumTitle.value).width, 0);
+    fgGradient.addColorStop(0, activeTheme.value.foreground[0]);
+    if (activeTheme.value.foreground.length > 2) {
+        fgGradient.addColorStop(0.45, activeTheme.value.foreground[1]);
+        fgGradient.addColorStop(1, activeTheme.value.foreground[2]);
+    } else if (activeTheme.value.foreground.length > 1) {
+        fgGradient.addColorStop(1, activeTheme.value.foreground[1]);
     } else {
-        ctx.fillStyle = '#e9e8e4';
+        fgGradient.addColorStop(1, activeTheme.value.foreground[0]);
     }
+    ctx.fillStyle = fgGradient;
     ctx.fillText(albumTitle.value, 237, 190 / 0.8 + 4, 737);
     const albumTitleWidth = ctx.measureText(albumTitle.value).width;
 
@@ -509,11 +755,19 @@ async function render() {
     // restore letterSpacing
     canvas.style.letterSpacing = letterSpacing;
 
-    const sideGradient = [
-        { offset: 0, color: activeTheme.value.colors[2] },
-        { offset: 0.25, color: activeTheme.value.colors[1] },
-        { offset: 1, color: activeTheme.value.colors[0] },
-    ];
+    const sideGradient: {offset: number, color: string}[] = [];
+
+    if (activeTheme.value.foreground.length > 2) {
+        sideGradient.push({ offset: 0, color: activeTheme.value.foreground[2] });
+        sideGradient.push({ offset: 0.25, color: activeTheme.value.foreground[1] });
+        sideGradient.push({ offset: 1, color: activeTheme.value.foreground[0] });
+    } else if (activeTheme.value.foreground.length > 1) {
+        sideGradient.push({ offset: 0, color: activeTheme.value.foreground[1] });
+        sideGradient.push({ offset: 1, color: activeTheme.value.foreground[0] });
+    } else {
+        sideGradient.push({ offset: 0, color: activeTheme.value.foreground[0] });
+        sideGradient.push({ offset: 1, color: activeTheme.value.foreground[0] });
+    }
 
     const sectionTitleHeight = (isSmall: boolean) => isSmall ? 25 : 31;
     const trackTitleHeight = (isSmall: boolean) => isSmall ? 17.4 : 21.4;
@@ -609,12 +863,14 @@ async function render() {
     if (!croppedAlbumImage.value) {
         croppedAlbumImage.value = (await crop(albumImage.value, 767 / 727)).toDataURL();
     }
-    const coverImage = new Image();
-    coverImage.onload = () => {
-        const imageWidth = 759;
-        const imageHeight = 729;
-        ctx.drawImage(coverImage, 0, 0, coverImage.width, coverImage.height, 242, 272, imageWidth, imageHeight);
-    };
+    if (!coverImage) {
+        coverImage = new Image();
+        coverImage.onload = () => {
+            const imageWidth = 759;
+            const imageHeight = 729;
+            ctx.drawImage(coverImage!, 0, 0, coverImage!.width, coverImage!.height, 242, 272, imageWidth, imageHeight);
+        };
+    }
     coverImage.src = croppedAlbumImage.value;
 }
 
@@ -664,15 +920,10 @@ function addGradientLongText(ctx: CanvasRenderingContext2D, text: string, x: num
 }
 
 function addGradientText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, gradientStops: any[], gradientWidth: number) {
-    console.log(arguments);
-    if (isDarkTheme.value) {
-        ctx.fillStyle = '#e9e8e4';
-    } else {
-        const gradient = ctx.createLinearGradient(x, 0, x + gradientWidth, 0);
-        gradientStops.forEach((stop: { offset: any; color: any; }) => gradient.addColorStop(stop.offset, stop.color));
-        // Fill with gradient
-        ctx.fillStyle = gradient;
-    }
+    const gradient = ctx.createLinearGradient(x, 0, x + gradientWidth, 0);
+    gradientStops.forEach((stop: { offset: any; color: any; }) => gradient.addColorStop(stop.offset, stop.color));
+    // Fill with gradient
+    ctx.fillStyle = gradient;
     ctx.fillText(text, x, y, sidebarTextWidth);
 }
 
@@ -688,13 +939,9 @@ function textUnderline(context: CanvasRenderingContext2D, text: string, x: numbe
     startX = x;
     endX = x + textWidth + 1;
 
-    if (isDarkTheme.value) {
-        context.strokeStyle = '#e9e8e4';
-    } else {
-        const gradient = context.createLinearGradient(x, 0, x + textWidth, 0);
-        gradientStops.forEach((stop: { offset: any; color: any; }) => gradient.addColorStop(stop.offset, stop.color));
-        context.strokeStyle = gradient;
-    }
+    const gradient = context.createLinearGradient(x, 0, x + textWidth, 0);
+    gradientStops.forEach((stop: { offset: any; color: any; }) => gradient.addColorStop(stop.offset, stop.color));
+    context.strokeStyle = gradient;
     // noinspection JSSuspiciousNameCombination
     context.lineWidth = underlineHeight;
     context.moveTo(startX, startY);

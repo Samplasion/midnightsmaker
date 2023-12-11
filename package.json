@@ -15,6 +15,7 @@
     "nuxt": "^3.8.2"
   },
   "dependencies": {
+    "@cyhnkckali/vue3-color-picker": "^1.1.1",
     "darkreader": "^4.9.57",
     "lodash.debounce": "^4.0.8"
   }
