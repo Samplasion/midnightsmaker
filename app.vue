@@ -120,6 +120,16 @@
                         Toggle edit background/text
                     </button>
                 </div>
+                <div class="text-xs mb-5">
+                    <label>
+                        <input
+                            type="checkbox"
+                            class="mt-2"
+                            v-model="showWatermark"
+                        />
+                        <span class="ml-2 text-gray-700 dark:text-gray-300">Show Watermark</span>
+                    </label>
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
                     <label class="block">
                         <span class="text-gray-700 dark:text-gray-300">Album Title</span>
@@ -335,6 +345,8 @@ const albumSubtitle = ref('(The Til Dawn Edition)');
 const albumImage = ref('img/cover_image_moonstone_blue.jpg');
 const sections = reactive([...defaultSections]);
 
+const showWatermark = ref(true);
+
 watch(albumImage, () => {
     croppedAlbumImage.value = null;
 });
@@ -354,6 +366,7 @@ watch([
     albumImage,
     sections,
     activeTheme,
+    showWatermark,
 ], () => {
     debouncedRender();
 });
@@ -461,19 +474,21 @@ async function render() {
     ctx.fillRect(0,0, canvas.width, canvas.height);
 
     // watermark
-    const watermarkGradient: {offset: number, color: string}[] = [];
+    if (showWatermark.value) {
+        const watermarkGradient: {offset: number, color: string}[] = [];
 
-    watermarkGradient.push({ offset: 0, color: activeTheme.value.foreground[0] });
-    if (activeTheme.value.foreground.length > 2) {
-        watermarkGradient.push({ offset: 0.25, color: activeTheme.value.foreground[1] });
-        watermarkGradient.push({ offset: 1, color: activeTheme.value.foreground[2] });
-    } else if (activeTheme.value.foreground.length > 1) {
-        watermarkGradient.push({ offset: 1, color: activeTheme.value.foreground[1] });
-    } else {
-        watermarkGradient.push({ offset: 1, color: activeTheme.value.foreground[0] });
+        watermarkGradient.push({ offset: 0, color: activeTheme.value.foreground[0] });
+        if (activeTheme.value.foreground.length > 2) {
+            watermarkGradient.push({ offset: 0.25, color: activeTheme.value.foreground[1] });
+            watermarkGradient.push({ offset: 1, color: activeTheme.value.foreground[2] });
+        } else if (activeTheme.value.foreground.length > 1) {
+            watermarkGradient.push({ offset: 1, color: activeTheme.value.foreground[1] });
+        } else {
+            watermarkGradient.push({ offset: 1, color: activeTheme.value.foreground[0] });
+        }
+        ctx.font = `300 16px ${font}`;
+        addGradientText(ctx, 'made with midnightsmaker.com', 10, 24, watermarkGradient, ctx.measureText('made with midnightsmaker.com').width);
     }
-    ctx.font = `300 16px ${font}`;
-    addGradientText(ctx, 'made with midnightsmaker.com', 10, 24, watermarkGradient, ctx.measureText('made with midnightsmaker.com').width);
 
     // album title
     canvas.style.letterSpacing = '-2.3px';
