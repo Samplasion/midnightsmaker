@@ -1039,6 +1039,6 @@ function slugify(str: string): string {
 
 <style>
 html {
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Helvetica Neue', 'Helvetica', 'Roboto', sans-serif;
 }
 </style>
